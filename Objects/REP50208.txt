@@ -1,0 +1,1009 @@
+OBJECT Report 50208 Sales - Shipment(208)
+{
+  OBJECT-PROPERTIES
+  {
+    Modified=Yes;
+    Date=30-07-18;
+    Time=20:54:24;
+    Version List=NAVW111.00,FORNAV3.2.0.1492/1492;
+    
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Sales - Shipment;
+               NLD=Verkoop - Verzending];
+    OnInitReport=BEGIN
+                   CompanyInfo.GET;
+                   SalesSetup.GET;
+                   FormatDocument.SetLogoPosition(SalesSetup."Logo Position on Documents",CompanyInfo1,CompanyInfo2,CompanyInfo3);
+                   ;ReportForNav:= ReportForNav.Report(CurrReport.OBJECTID,CurrReport.LANGUAGE,SERIALNUMBER,USERID,COMPANYNAME);ReportForNav.Init;
+                 END;
+    OnPreReport=BEGIN
+                  IF NOT CurrReport.USEREQUESTPAGE THEN
+                    InitLogInteraction;
+                  AsmHeaderExists := FALSE;
+                  ;ReportForNav.OpenDesigner:=ReportForNavOpenDesigner;IF NOT ReportForNav.Pre THEN CurrReport.QUIT;
+                END;
+    OnPostReport=BEGIN
+                   ;ReportForNav.Post;
+                 END;
+    
+  }
+  DATASET
+  {
+    { 3595;   ;DataItem;                   ;
+               DataItemTableView=SORTING(No.);
+               DataItemTable=Table110;
+               ReqFilterFields=No.,Sell-to Customer No.,No. Printed;
+               ReqFilterHeadingML=[ENU=Posted Sales Shipment;NLD=Geboekte verkoopverzending];
+               OnAfterGetRecord=BEGIN
+                                  CurrReport.LANGUAGE := Language.GetLanguageID("Language Code");
+                                  FormatAddressFields("Sales Shipment Header");
+                                  FormatDocumentFields("Sales Shipment Header");
+                                  DimSetEntry1.SETRANGE("Dimension Set ID","Dimension Set ID");
+                                  IF LogInteraction THEN
+                                    IF NOT CurrReport.PREVIEW THEN
+                                      SegManagement.LogDocument(
+                                        5,"No.",0,0,DATABASE::Customer,"Sell-to Customer No.","Salesperson Code",
+                                        "Campaign No.","Posting Description",'');
+                                END;
+                }
+    { 119   ;1   ;Column  ;No_SalesShptHeader;
+               SourceExpr="No.";
+               IncludeCaption=No; }
+    { 46   ;1   ;Column  ;PageCaption;
+               SourceExpr=PageCaptionCap;
+               IncludeCaption=No; }
+    { 5701; 1 ;DataItem; CopyLoop                  ;
+               DataItemTableView=SORTING(Number);
+               DataItemTable=Table2000000026;
+               OnAfterGetRecord=BEGIN
+                                  IF Number > 1 THEN BEGIN
+                                    CopyText := FormatDocument.GetCOPYText;
+                                    OutputNo += 1;
+                                  END;
+                                  ReportForNav.PageNo := 1;
+                                  TotalQty := 0;           // Item Tracking
+                                END;
+               OnPreDataItem=BEGIN
+                               NoOfLoops := 1 + ABS(NoOfCopies);
+                               CopyText := '';
+                               SETRANGE(Number,1,NoOfLoops);
+                               OutputNo := 1;
+                             END;
+               OnPostDataItem=BEGIN
+                                IF NOT CurrReport.PREVIEW THEN
+                                  CODEUNIT.RUN(CODEUNIT::"Sales Shpt.-Printed","Sales Shipment Header");
+                              END;
+                }
+    { 6455; 2 ;DataItem; PageLoop                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=CONST(1));
+               DataItemTable=Table2000000026;
+               OnPreDataItem=BEGIN
+                               // Item Tracking:
+                               IF ShowLotSN THEN BEGIN
+                                 TrackingSpecCount := 0;
+                                 OldRefNo := 0;
+                                 ShowGroup := FALSE;
+                               END;
+                             END;
+                }
+    { 75   ;3   ;Column  ;CompanyInfo2Picture;
+               SourceExpr=CompanyInfo2.Picture;
+               IncludeCaption=No; }
+    { 74   ;3   ;Column  ;CompanyInfo1Picture;
+               SourceExpr=CompanyInfo1.Picture;
+               IncludeCaption=No; }
+    { 54   ;3   ;Column  ;CompanyInfo3Picture;
+               SourceExpr=CompanyInfo3.Picture;
+               IncludeCaption=No; }
+    { 1   ;3   ;Column  ;SalesShptCopyText;
+               SourceExpr=STRSUBSTNO(Text002,CopyText);
+               IncludeCaption=No; }
+    { 4   ;3   ;Column  ;ShipToAddr1;
+               SourceExpr=ShipToAddr[1];
+               IncludeCaption=No; }
+    { 5   ;3   ;Column  ;CompanyAddr1;
+               SourceExpr=CompanyAddr[1];
+               IncludeCaption=No; }
+    { 6   ;3   ;Column  ;ShipToAddr2;
+               SourceExpr=ShipToAddr[2];
+               IncludeCaption=No; }
+    { 7   ;3   ;Column  ;CompanyAddr2;
+               SourceExpr=CompanyAddr[2];
+               IncludeCaption=No; }
+    { 8   ;3   ;Column  ;ShipToAddr3;
+               SourceExpr=ShipToAddr[3];
+               IncludeCaption=No; }
+    { 9   ;3   ;Column  ;CompanyAddr3;
+               SourceExpr=CompanyAddr[3];
+               IncludeCaption=No; }
+    { 10   ;3   ;Column  ;ShipToAddr4;
+               SourceExpr=ShipToAddr[4];
+               IncludeCaption=No; }
+    { 11   ;3   ;Column  ;CompanyAddr4;
+               SourceExpr=CompanyAddr[4];
+               IncludeCaption=No; }
+    { 12   ;3   ;Column  ;ShipToAddr5;
+               SourceExpr=ShipToAddr[5];
+               IncludeCaption=No; }
+    { 14   ;3   ;Column  ;CompanyInfoPhoneNo;
+               SourceExpr=CompanyInfo."Phone No.";
+               IncludeCaption=No; }
+    { 15   ;3   ;Column  ;ShipToAddr6;
+               SourceExpr=ShipToAddr[6];
+               IncludeCaption=No; }
+    { 2   ;3   ;Column  ;CompanyInfoHomePage;
+               SourceExpr=CompanyInfo."Home Page";
+               IncludeCaption=No; }
+    { 16   ;3   ;Column  ;CompanyInfoEmail;
+               SourceExpr=CompanyInfo."E-Mail";
+               IncludeCaption=No; }
+    { 17   ;3   ;Column  ;CompanyInfoFaxNo;
+               SourceExpr=CompanyInfo."Fax No.";
+               IncludeCaption=No; }
+    { 19   ;3   ;Column  ;CompanyInfoVATRegtnNo;
+               SourceExpr=CompanyInfo."VAT Registration No.";
+               IncludeCaption=No; }
+    { 21   ;3   ;Column  ;CompanyInfoGiroNo;
+               SourceExpr=CompanyInfo."Giro No.";
+               IncludeCaption=No; }
+    { 23   ;3   ;Column  ;CompanyInfoBankName;
+               SourceExpr=CompanyInfo."Bank Name";
+               IncludeCaption=No; }
+    { 25   ;3   ;Column  ;CompanyInfoBankAccountNo;
+               SourceExpr=CompanyInfo."Bank Account No.";
+               IncludeCaption=No; }
+    { 27   ;3   ;Column  ;SelltoCustNo_SalesShptHeader;
+               SourceExpr="Sales Shipment Header"."Sell-to Customer No.";
+               IncludeCaption=No; }
+    { 28   ;3   ;Column  ;DocDate_SalesShptHeader;
+               SourceExpr=FORMAT("Sales Shipment Header"."Document Date",0,4);
+               IncludeCaption=No; }
+    { 29   ;3   ;Column  ;SalesPersonText;
+               SourceExpr=SalesPersonText;
+               IncludeCaption=No; }
+    { 30   ;3   ;Column  ;SalesPurchPersonName;
+               SourceExpr=SalesPurchPerson.Name;
+               IncludeCaption=No; }
+    { 33   ;3   ;Column  ;ReferenceText;
+               SourceExpr=ReferenceText;
+               IncludeCaption=No; }
+    { 34   ;3   ;Column  ;YourRef_SalesShptHeader;
+               SourceExpr="Sales Shipment Header"."Your Reference";
+               IncludeCaption=No; }
+    { 3   ;3   ;Column  ;ShipToAddr7;
+               SourceExpr=ShipToAddr[7];
+               IncludeCaption=No; }
+    { 64   ;3   ;Column  ;ShipToAddr8;
+               SourceExpr=ShipToAddr[8];
+               IncludeCaption=No; }
+    { 65   ;3   ;Column  ;CompanyAddr5;
+               SourceExpr=CompanyAddr[5];
+               IncludeCaption=No; }
+    { 66   ;3   ;Column  ;CompanyAddr6;
+               SourceExpr=CompanyAddr[6];
+               IncludeCaption=No; }
+    { 69   ;3   ;Column  ;ShptDate_SalesShptHeader;
+               SourceExpr=FORMAT("Sales Shipment Header"."Shipment Date");
+               IncludeCaption=No; }
+    { 96   ;3   ;Column  ;OutputNo;
+               SourceExpr=OutputNo;
+               IncludeCaption=No; }
+    { 76   ;3   ;Column  ;ItemTrackingAppendixCaption;
+               SourceExpr=ItemTrackingAppendixCaptionLbl;
+               IncludeCaption=No; }
+    { 13   ;3   ;Column  ;PhoneNoCaption;
+               SourceExpr=PhoneNoCaptionLbl;
+               IncludeCaption=No; }
+    { 18   ;3   ;Column  ;VATRegNoCaption;
+               SourceExpr=VATRegNoCaptionLbl;
+               IncludeCaption=No; }
+    { 20   ;3   ;Column  ;GiroNoCaption;
+               SourceExpr=GiroNoCaptionLbl;
+               IncludeCaption=No; }
+    { 22   ;3   ;Column  ;BankNameCaption;
+               SourceExpr=BankNameCaptionLbl;
+               IncludeCaption=No; }
+    { 24   ;3   ;Column  ;BankAccNoCaption;
+               SourceExpr=BankAccNoCaptionLbl;
+               IncludeCaption=No; }
+    { 31   ;3   ;Column  ;ShipmentNoCaption;
+               SourceExpr=ShipmentNoCaptionLbl;
+               IncludeCaption=No; }
+    { 70   ;3   ;Column  ;ShipmentDateCaption;
+               SourceExpr=ShipmentDateCaptionLbl;
+               IncludeCaption=No; }
+    { 26   ;3   ;Column  ;HomePageCaption;
+               SourceExpr=HomePageCaptionLbl;
+               IncludeCaption=No; }
+    { 32   ;3   ;Column  ;EmailCaption;
+               SourceExpr=EmailCaptionLbl;
+               IncludeCaption=No; }
+    { 35   ;3   ;Column  ;DocumentDateCaption;
+               SourceExpr=DocumentDateCaptionLbl;
+               IncludeCaption=No; }
+    { 36   ;3   ;Column  ;SelltoCustNo_SalesShptHeaderCaption;
+               SourceExpr="Sales Shipment Header".FIELDCAPTION("Sell-to Customer No.");
+               IncludeCaption=No; }
+    { 47   ;3   ;Column  ;OrderNoCaption_SalesShptHeader;
+               SourceExpr='Our Document No.';
+               IncludeCaption=No; }
+    { 48   ;3   ;Column  ;OrderNo_SalesShptHeader;
+               SourceExpr="Sales Shipment Header"."Order No.";
+               IncludeCaption=No; }
+    { 49   ;3   ;Column  ;ExternalDocumentNoCaption_SalesShptHeader;
+               SourceExpr='Purchase Order No.';
+               IncludeCaption=No; }
+    { 50   ;3   ;Column  ;ExternalDocumentNo_SalesShptHeader;
+               SourceExpr="Sales Shipment Header"."External Document No.";
+               IncludeCaption=No; }
+    { 7574; 3 ;DataItem; DimensionLoop1                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=FILTER(1..));
+               DataItemTable=Table2000000026;
+               DataItemLinkReference=Sales Shipment Header;
+               OnAfterGetRecord=BEGIN
+                                  IF Number = 1 THEN BEGIN
+                                    IF NOT DimSetEntry1.FINDSET THEN
+                                      CurrReport.BREAK;
+                                  END ELSE
+                                    IF NOT Continue THEN
+                                      CurrReport.BREAK;
+                                  CLEAR(DimText);
+                                  Continue := FALSE;
+                                  REPEAT
+                                    OldDimText := DimText;
+                                    IF DimText = '' THEN
+                                      DimText := STRSUBSTNO('%1 - %2',DimSetEntry1."Dimension Code",DimSetEntry1."Dimension Value Code")
+                                    ELSE
+                                      DimText :=
+                                        STRSUBSTNO(
+                                          '%1; %2 - %3',DimText,
+                                          DimSetEntry1."Dimension Code",DimSetEntry1."Dimension Value Code");
+                                    IF STRLEN(DimText) > MAXSTRLEN(OldDimText) THEN BEGIN
+                                      DimText := OldDimText;
+                                      Continue := TRUE;
+                                      EXIT;
+                                    END;
+                                  UNTIL DimSetEntry1.NEXT = 0;
+                                END;
+               OnPreDataItem=BEGIN
+                               IF NOT ShowInternalInfo THEN
+                                 CurrReport.BREAK;
+                             END;
+                }
+    { 51   ;4   ;Column  ;DimText;
+               SourceExpr=DimText;
+               IncludeCaption=No; }
+    { 52   ;4   ;Column  ;HeaderDimensionsCaption;
+               SourceExpr=HeaderDimensionsCaptionLbl;
+               IncludeCaption=No; }
+    { 2502; 3 ;DataItem;                   ;
+               DataItemTableView=SORTING(Document No.,Line No.);
+               DataItemTable=Table111;
+               DataItemLinkReference=Sales Shipment Header;
+               DataItemLink=Document No.=FIELD(No.);
+               OnAfterGetRecord=BEGIN
+                                  LinNo := "Line No.";
+                                  IF NOT ShowCorrectionLines AND Correction THEN
+                                    CurrReport.SKIP;
+                                  DimSetEntry2.SETRANGE("Dimension Set ID","Dimension Set ID");
+                                  IF DisplayAssemblyInformation THEN
+                                    AsmHeaderExists := AsmToShipmentExists(PostedAsmHeader);
+                                END;
+               OnPreDataItem=BEGIN
+                               MoreLines := FIND('+');
+                               WHILE MoreLines AND (Description = '') AND ("No." = '') AND (Quantity = 0) DO
+                                 MoreLines := NEXT(-1) <> 0;
+                               IF NOT MoreLines THEN
+                                 CurrReport.BREAK;
+                               SETRANGE("Line No.",0,"Line No.");
+                             END;
+               OnPostDataItem=BEGIN
+                                IF ShowLotSN THEN BEGIN
+                                  ItemTrackingDocMgt.SetRetrieveAsmItemTracking(TRUE);
+                                  TrackingSpecCount :=
+                                    ItemTrackingDocMgt.RetrieveDocumentItemTracking(TrackingSpecBuffer,
+                                      "Sales Shipment Header"."No.",DATABASE::"Sales Shipment Header",0);
+                                  ItemTrackingDocMgt.SetRetrieveAsmItemTracking(FALSE);
+                                END;
+                              END;
+                }
+    { 39   ;4   ;Column  ;Description_SalesShptLine;
+               SourceExpr=Description;
+               IncludeCaption=No; }
+    { 92   ;4   ;Column  ;ShowInternalInfo;
+               SourceExpr=ShowInternalInfo;
+               IncludeCaption=No; }
+    { 94   ;4   ;Column  ;ShowCorrectionLines;
+               SourceExpr=ShowCorrectionLines;
+               IncludeCaption=No; }
+    { 97   ;4   ;Column  ;Type_SalesShptLine;
+               SourceExpr=FORMAT(Type,0,2);
+               IncludeCaption=No; }
+    { 101   ;4   ;Column  ;AsmHeaderExists;
+               SourceExpr=AsmHeaderExists;
+               IncludeCaption=No; }
+    { 106   ;4   ;Column  ;DocumentNo_SalesShptLine;
+               SourceExpr="Document No.";
+               IncludeCaption=No; }
+    { 108   ;4   ;Column  ;LinNo;
+               SourceExpr=LinNo;
+               IncludeCaption=No; }
+    { 41   ;4   ;Column  ;Qty_SalesShptLine;
+               SourceExpr=Quantity;
+               IncludeCaption=No; }
+    { 42   ;4   ;Column  ;UOM_SalesShptLine;
+               SourceExpr="Unit of Measure";
+               IncludeCaption=No; }
+    { 43   ;4   ;Column  ;No_SalesShptLine;
+               SourceExpr="No.";
+               IncludeCaption=No; }
+    { 122   ;4   ;Column  ;LineNo_SalesShptLine;
+               SourceExpr="Line No.";
+               IncludeCaption=No; }
+    { 37   ;4   ;Column  ;Description_SalesShptLineCaption;
+               SourceExpr=FIELDCAPTION(Description);
+               IncludeCaption=No; }
+    { 38   ;4   ;Column  ;Qty_SalesShptLineCaption;
+               SourceExpr=FIELDCAPTION(Quantity);
+               IncludeCaption=No; }
+    { 40   ;4   ;Column  ;UOM_SalesShptLineCaption;
+               SourceExpr=FIELDCAPTION("Unit of Measure");
+               IncludeCaption=No; }
+    { 44   ;4   ;Column  ;No_SalesShptLineCaption;
+               SourceExpr=FIELDCAPTION("No.");
+               IncludeCaption=No; }
+    { 3591; 4 ;DataItem; DimensionLoop2                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=FILTER(1..));
+               DataItemTable=Table2000000026;
+               OnAfterGetRecord=BEGIN
+                                  IF Number = 1 THEN BEGIN
+                                    IF NOT DimSetEntry2.FINDSET THEN
+                                      CurrReport.BREAK;
+                                  END ELSE
+                                    IF NOT Continue THEN
+                                      CurrReport.BREAK;
+                                  CLEAR(DimText);
+                                  Continue := FALSE;
+                                  REPEAT
+                                    OldDimText := DimText;
+                                    IF DimText = '' THEN
+                                      DimText := STRSUBSTNO('%1 - %2',DimSetEntry2."Dimension Code",DimSetEntry2."Dimension Value Code")
+                                    ELSE
+                                      DimText :=
+                                        STRSUBSTNO(
+                                          '%1; %2 - %3',DimText,
+                                          DimSetEntry2."Dimension Code",DimSetEntry2."Dimension Value Code");
+                                    IF STRLEN(DimText) > MAXSTRLEN(OldDimText) THEN BEGIN
+                                      DimText := OldDimText;
+                                      Continue := TRUE;
+                                      EXIT;
+                                    END;
+                                  UNTIL DimSetEntry2.NEXT = 0;
+                                END;
+               OnPreDataItem=BEGIN
+                               IF NOT ShowInternalInfo THEN
+                                 CurrReport.BREAK;
+                             END;
+                }
+    { 71   ;5   ;Column  ;DimText1;
+               SourceExpr=DimText;
+               IncludeCaption=No; }
+    { 72   ;5   ;Column  ;LineDimensionsCaption;
+               SourceExpr=LineDimensionsCaptionLbl;
+               IncludeCaption=No; }
+    { 7359; 4 ;DataItem; DisplayAsmInfo                  ;
+               DataItemTableView=SORTING(Number);
+               DataItemTable=Table2000000026;
+               OnAfterGetRecord=VAR
+                                  ItemTranslation@1000 : Record 30;
+                                BEGIN
+                                  IF Number = 1 THEN
+                                    PostedAsmLine.FINDSET
+                                  ELSE
+                                    PostedAsmLine.NEXT;
+                                  IF ItemTranslation.GET(PostedAsmLine."No.",
+                                       PostedAsmLine."Variant Code",
+                                       "Sales Shipment Header"."Language Code")
+                                  THEN
+                                    PostedAsmLine.Description := ItemTranslation.Description;
+                                END;
+               OnPreDataItem=BEGIN
+                               IF NOT DisplayAssemblyInformation THEN
+                                 CurrReport.BREAK;
+                               IF NOT AsmHeaderExists THEN
+                                 CurrReport.BREAK;
+                               PostedAsmLine.SETRANGE("Document No.",PostedAsmHeader."No.");
+                               SETRANGE(Number,1,PostedAsmLine.COUNT);
+                             END;
+                }
+    { 103   ;5   ;Column  ;PostedAsmLineItemNo;
+               SourceExpr=BlanksForIndent + PostedAsmLine."No.";
+               IncludeCaption=No; }
+    { 104   ;5   ;Column  ;PostedAsmLineDescription;
+               SourceExpr=BlanksForIndent + PostedAsmLine.Description;
+               IncludeCaption=No; }
+    { 105   ;5   ;Column  ;PostedAsmLineQuantity;
+               SourceExpr=PostedAsmLine.Quantity;
+               IncludeCaption=No;
+               DecimalPlaces=0:5; }
+    { 107   ;5   ;Column  ;PostedAsmLineUOMCode;
+               SourceExpr=GetUnitOfMeasureDescr(PostedAsmLine."Unit of Measure Code");
+               IncludeCaption=No;
+               DecimalPlaces=0:5; }
+    { 3476; 3 ;DataItem; Total                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=CONST(1));
+               DataItemTable=Table2000000026;
+                }
+    { 3363; 3 ;DataItem; Total2                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=CONST(1));
+               DataItemTable=Table2000000026;
+               OnPreDataItem=BEGIN
+                               IF NOT ShowCustAddr THEN
+                                 CurrReport.BREAK;
+                             END;
+                }
+    { 57   ;4   ;Column  ;BilltoCustNo_SalesShptHeader;
+               SourceExpr="Sales Shipment Header"."Bill-to Customer No.";
+               IncludeCaption=No; }
+    { 58   ;4   ;Column  ;CustAddr1;
+               SourceExpr=CustAddr[1];
+               IncludeCaption=No; }
+    { 59   ;4   ;Column  ;CustAddr2;
+               SourceExpr=CustAddr[2];
+               IncludeCaption=No; }
+    { 60   ;4   ;Column  ;CustAddr3;
+               SourceExpr=CustAddr[3];
+               IncludeCaption=No; }
+    { 61   ;4   ;Column  ;CustAddr4;
+               SourceExpr=CustAddr[4];
+               IncludeCaption=No; }
+    { 62   ;4   ;Column  ;CustAddr5;
+               SourceExpr=CustAddr[5];
+               IncludeCaption=No; }
+    { 63   ;4   ;Column  ;CustAddr6;
+               SourceExpr=CustAddr[6];
+               IncludeCaption=No; }
+    { 67   ;4   ;Column  ;CustAddr7;
+               SourceExpr=CustAddr[7];
+               IncludeCaption=No; }
+    { 68   ;4   ;Column  ;CustAddr8;
+               SourceExpr=CustAddr[8];
+               IncludeCaption=No; }
+    { 55   ;4   ;Column  ;BilltoAddressCaption;
+               SourceExpr=BilltoAddressCaptionLbl;
+               IncludeCaption=No; }
+    { 45   ;4   ;Column  ;BilltoCustNo_SalesShptHeaderCaption;
+               SourceExpr="Sales Shipment Header".FIELDCAPTION("Bill-to Customer No.");
+               IncludeCaption=No; }
+    { 6034; 3 ;DataItem; ItemTrackingLine                  ;
+               DataItemTableView=SORTING(Number);
+               DataItemTable=Table2000000026;
+               OnAfterGetRecord=BEGIN
+                                  IF Number = 1 THEN
+                                    TrackingSpecBuffer.FINDSET
+                                  ELSE
+                                    TrackingSpecBuffer.NEXT;
+                                  IF NOT ShowCorrectionLines AND TrackingSpecBuffer.Correction THEN
+                                    CurrReport.SKIP;
+                                  IF TrackingSpecBuffer.Correction THEN
+                                    TrackingSpecBuffer."Quantity (Base)" := -TrackingSpecBuffer."Quantity (Base)";
+                                  ShowTotal := FALSE;
+                                  IF ItemTrackingAppendix.IsStartNewGroup(TrackingSpecBuffer) THEN
+                                    ShowTotal := TRUE;
+                                  ShowGroup := FALSE;
+                                  IF (TrackingSpecBuffer."Source Ref. No." <> OldRefNo) OR
+                                     (TrackingSpecBuffer."Item No." <> OldNo)
+                                  THEN BEGIN
+                                    OldRefNo := TrackingSpecBuffer."Source Ref. No.";
+                                    OldNo := TrackingSpecBuffer."Item No.";
+                                    TotalQty := 0;
+                                  END ELSE
+                                    ShowGroup := TRUE;
+                                  TotalQty += TrackingSpecBuffer."Quantity (Base)";
+                                END;
+               OnPreDataItem=BEGIN
+                               IF TrackingSpecCount = 0 THEN
+                                 CurrReport.BREAK;
+                               ReportForNav.NewPageWithoutTransportTotals;
+                               SETRANGE(Number,1,TrackingSpecCount);
+                               TrackingSpecBuffer.SETCURRENTKEY("Source ID","Source Type","Source Subtype","Source Batch Name",
+                                 "Source Prod. Order Line","Source Ref. No.");
+                             END;
+                }
+    { 78   ;4   ;Column  ;TrackingSpecBufferNo;
+               SourceExpr=TrackingSpecBuffer."Item No.";
+               IncludeCaption=No; }
+    { 79   ;4   ;Column  ;TrackingSpecBufferDesc;
+               SourceExpr=TrackingSpecBuffer.Description;
+               IncludeCaption=No; }
+    { 80   ;4   ;Column  ;TrackingSpecBufferLotNo;
+               SourceExpr=TrackingSpecBuffer."Lot No.";
+               IncludeCaption=No; }
+    { 81   ;4   ;Column  ;TrackingSpecBufferSerNo;
+               SourceExpr=TrackingSpecBuffer."Serial No.";
+               IncludeCaption=No; }
+    { 82   ;4   ;Column  ;TrackingSpecBufferQty;
+               SourceExpr=TrackingSpecBuffer."Quantity (Base)";
+               IncludeCaption=No; }
+    { 98   ;4   ;Column  ;ShowTotal;
+               SourceExpr=ShowTotal;
+               IncludeCaption=No; }
+    { 99   ;4   ;Column  ;ShowGroup;
+               SourceExpr=ShowGroup;
+               IncludeCaption=No; }
+    { 77   ;4   ;Column  ;QuantityCaption;
+               SourceExpr=QuantityCaptionLbl;
+               IncludeCaption=No; }
+    { 85   ;4   ;Column  ;SerialNoCaption;
+               SourceExpr=SerialNoCaptionLbl;
+               IncludeCaption=No; }
+    { 86   ;4   ;Column  ;LotNoCaption;
+               SourceExpr=LotNoCaptionLbl;
+               IncludeCaption=No; }
+    { 90   ;4   ;Column  ;DescriptionCaption;
+               SourceExpr=DescriptionCaptionLbl;
+               IncludeCaption=No; }
+    { 91   ;4   ;Column  ;NoCaption;
+               SourceExpr=NoCaptionLbl;
+               IncludeCaption=No; }
+    { 3353; 4 ;DataItem; TotalItemTracking                  ;
+               DataItemTableView=SORTING(Number) WHERE(Number=CONST(1));
+               DataItemTable=Table2000000026;
+                }
+    { 84   ;5   ;Column  ;Quantity1;
+               SourceExpr=TotalQty;
+               IncludeCaption=No; }
+
+  }
+
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+      SaveValues=Yes;
+      OnInit=BEGIN
+               LogInteractionEnable := TRUE;
+             END;
+
+      OnOpenPage=BEGIN
+                   InitLogInteraction;
+                   LogInteractionEnable := LogInteraction;
+                 END;
+
+    }
+    CONTROLS
+    {
+      { 1900000001;0;Container;
+                  ContainerType=ContentArea }
+
+      { 1900000002;1;Group  ;
+                  CaptionML=[ENU=Options;
+                             NLD=Opties] }
+
+      { 1   ;2   ;Field     ;
+                  CaptionML=[ENU=No. of Copies;
+                             NLD=Aantal exemplaren];
+                  ToolTipML=[ENU=Specifies how many copies of the document to print.;
+                             NLD=Hiermee wordt opgegeven hoeveel exemplaren van het document worden afgedrukt.];
+                  ApplicationArea=#Advanced;
+                  SourceExpr=NoOfCopies }
+
+      { 2   ;2   ;Field     ;
+                  CaptionML=[ENU=Show Internal Information;
+                             NLD=Interne informatie weergeven];
+                  ToolTipML=[ENU=Specifies if the document shows internal information.;
+                             NLD=Hiermee wordt opgegeven of het document interne informatie weergeeft.];
+                  ApplicationArea=#Advanced;
+                  SourceExpr=ShowInternalInfo }
+
+      { 4   ;2   ;Field     ;
+                  Name=LogInteraction;
+                  CaptionML=[ENU=Log Interaction;
+                             NLD=Interactie registreren];
+                  ToolTipML=[ENU=Specifies if you want to record the reports that you print as interactions.;
+                             NLD=Hiermee wordt opgegeven of de rapporten die u afdrukt als interacties worden geregistreerd.];
+                  ApplicationArea=#Advanced;
+                  SourceExpr=LogInteraction;
+                  Enabled=LogInteractionEnable }
+
+      { 6   ;2   ;Field     ;
+                  Name=Show Correction Lines;
+                  CaptionML=[ENU=Show Correction Lines;
+                             NLD=Correctieregels weergeven];
+                  ToolTipML=[ENU=Specifies if the correction lines of an undoing of quantity posting will be shown on the report.;
+                             NLD=Hiermee wordt opgegeven of de correctieregels van een herstelde boeking van aantallen wordt weergegeven in het rapport.];
+                  ApplicationArea=#Advanced;
+                  SourceExpr=ShowCorrectionLines }
+
+      { 9   ;2   ;Field     ;
+                  CaptionML=[ENU=Show Serial/Lot Number Appendix;
+                             NLD=Bijlage serie-/lotnummers weergeven];
+                  ToolTipML=[ENU=Specifies if you want to print an appendix to the sales shipment report showing the lot and serial numbers in the shipment.;
+                             NLD=Hiermee wordt opgegeven of een bijlage bij het verkoopverzendingsrapport wordt afgedrukt met de lot- en serienummers in de verzending.];
+                  ApplicationArea=#Advanced;
+                  SourceExpr=ShowLotSN }
+
+      { 3   ;2   ;Field     ;
+                  Name=DisplayAsmInfo;
+                  CaptionML=[ENU=Show Assembly Components;
+                             NLD=Assemblagecomponenten weergeven];
+                  ToolTipML=[ENU=Specifies if you want the report to include information about components that were used in linked assembly orders that supplied the item(s) being sold.;
+                             NLD=Hiermee wordt opgegeven of in het rapport informatie moet worden opgenomen over onderdelen die zijn gebruikt in gekoppelde assemblageorders waarmee de artikelen worden verkocht.];
+                  ApplicationArea=#Assembly;
+                  SourceExpr=DisplayAssemblyInformation }
+
+      { 5000;2   ;Field     ;
+                  Name=ForNavOpenDesigner;
+                  CaptionML=ENU=Open Designer;
+                  SourceExpr=ReportForNavOpenDesigner;
+                  Visible=ReportForNavAllowDesign }
+
+    }
+  }
+  LABELS
+  {
+  }
+  CODE
+  {
+    VAR
+      Text002@1002 : TextConst '@@@="%1 = Document No.";ENU=Sales - Shipment %1;NLD=Verkoop - Verzending %1';
+      SalesPurchPerson@1004 : Record 13;
+      CompanyInfo@1005 : Record 79;
+      CompanyInfo1@1030 : Record 79;
+      CompanyInfo2@1031 : Record 79;
+      CompanyInfo3@1051 : Record 79;
+      SalesSetup@1033 : Record 311;
+      DimSetEntry1@1006 : Record 480;
+      DimSetEntry2@1007 : Record 480;
+      Language@1008 : Record 8;
+      TrackingSpecBuffer@1034 : TEMPORARY Record 336;
+      PostedAsmHeader@1047 : Record 910;
+      PostedAsmLine@1049 : Record 911;
+      RespCenter@1001 : Record 5714;
+      ItemTrackingAppendix@1009 : Report 6521;
+      FormatAddr@1000 : Codeunit 365;
+      FormatDocument@1043 : Codeunit 368;
+      SegManagement@1010 : Codeunit 5051;
+      ItemTrackingDocMgt@1036 : Codeunit 6503;
+      CustAddr@1012 : ARRAY [8] OF Text[50];
+      ShipToAddr@1013 : ARRAY [8] OF Text[50];
+      CompanyAddr@1014 : ARRAY [8] OF Text[50];
+      SalesPersonText@1015 : Text[20];
+      ReferenceText@1016 : Text[80];
+      MoreLines@1017 : Boolean;
+      NoOfCopies@1018 : Integer;
+      OutputNo@1044 : Integer;
+      NoOfLoops@1019 : Integer;
+      TrackingSpecCount@1037 : Integer;
+      OldRefNo@1041 : Integer;
+      OldNo@1040 : Code[20];
+      CopyText@1020 : Text[30];
+      ShowCustAddr@1021 : Boolean;
+      DimText@1024 : Text[120];
+      OldDimText@1025 : Text[75];
+      ShowInternalInfo@1026 : Boolean;
+      Continue@1027 : Boolean;
+      LogInteraction@1028 : Boolean;
+      ShowCorrectionLines@1029 : Boolean;
+      ShowLotSN@1032 : Boolean;
+      ShowTotal@1035 : Boolean;
+      ShowGroup@1039 : Boolean;
+      TotalQty@1038 : Decimal;
+      LogInteractionEnable@19003940 : Boolean INDATASET;
+      DisplayAssemblyInformation@1046 : Boolean;
+      AsmHeaderExists@1048 : Boolean;
+      LinNo@1050 : Integer;
+      ItemTrackingAppendixCaptionLbl@2141 : TextConst 'ENU=Item Tracking - Appendix;NLD=Artikeltracering - Appendix';
+      PhoneNoCaptionLbl@6169 : TextConst 'ENU=Phone No.;NLD=Telefoon';
+      VATRegNoCaptionLbl@2224 : TextConst 'ENU=VAT Reg. No.;NLD=Btw-nummer';
+      GiroNoCaptionLbl@7839 : TextConst 'ENU=Giro No.;NLD=Gironr.';
+      BankNameCaptionLbl@5585 : TextConst 'ENU=Bank;NLD=Bank';
+      BankAccNoCaptionLbl@1535 : TextConst 'ENU=Account No.;NLD=Rekeningnr.';
+      ShipmentNoCaptionLbl@2735 : TextConst 'ENU=Shipment No.;NLD=Verzendnr.';
+      ShipmentDateCaptionLbl@3615 : TextConst 'ENU=Shipment Date;NLD=Verzenddatum';
+      HomePageCaptionLbl@1436 : TextConst 'ENU=Home Page;NLD=Homepage';
+      EmailCaptionLbl@7682 : TextConst 'ENU=Email;NLD=E-mail';
+      DocumentDateCaptionLbl@7509 : TextConst 'ENU=Document Date;NLD=Documentdatum';
+      HeaderDimensionsCaptionLbl@7125 : TextConst 'ENU=Header Dimensions;NLD=Kopdimensies';
+      LineDimensionsCaptionLbl@3801 : TextConst 'ENU=Line Dimensions;NLD=Regeldimensies';
+      BilltoAddressCaptionLbl@4097 : TextConst 'ENU=Bill-to Address;NLD=Factuuradres';
+      QuantityCaptionLbl@7263 : TextConst 'ENU=Quantity;NLD=Aantal';
+      SerialNoCaptionLbl@8381 : TextConst 'ENU=Serial No.;NLD=Serienummer';
+      LotNoCaptionLbl@7033 : TextConst 'ENU=Lot No.;NLD=Lotnr.';
+      DescriptionCaptionLbl@3701 : TextConst 'ENU=Description;NLD=Omschrijving';
+      NoCaptionLbl@6828 : TextConst 'ENU=No.;NLD=Nr.';
+      PageCaptionCap@1003 : TextConst 'ENU=Page %1 of %2;NLD=Pagina %1 van %2';
+      ReportForNav@5000 : DotNet "'ForNav.Reports.3.2.0.1492, Version=3.2.0.1492, Culture=neutral, PublicKeyToken=5284c1af2984feb0'.ForNav.Report" WITHEVENTS;
+      ReportForNavClient@5003 : DotNet "'ForNav.Reports.3.2.0.1492, Version=3.2.0.1492, Culture=neutral, PublicKeyToken=5284c1af2984feb0'.ForNav.Report" RUNONCLIENT;
+      ReportForNavDialog@5001: Dialog;
+      ReportForNavOpenDesigner@5002 : Boolean;
+      ReportForNavAllowDesign@5004 : Boolean INDATASET;
+
+    EVENT ReportForNav@5000::OnInit@5002();
+    VAR
+      ReportLayoutSelection@1000 : Record 9651;
+      CustomReportLayout@1001 : Record 9650;
+      CustomLayoutID@1002 : Variant;
+      InStream@1004 : InStream;
+      EmptyLayout@1003 : Text;
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      EmptyLayout := FORMAT(ReportLayoutSelection."6");
+      CustomLayoutID := ReportLayoutSelection."6";
+      ReportForNav.OData := GETURL(CLIENTTYPE::OData, COMPANYNAME, OBJECTTYPE::Page, 7702);
+      IF FORMAT(ReportLayoutSelection.GetTempLayoutSelected) <> EmptyLayout THEN
+        CustomLayoutID := ReportLayoutSelection.GetTempLayoutSelected
+      ELSE
+        IF ReportLayoutSelection.HasCustomLayout(ReportForNav.ReportID) = 1 THEN
+          CustomLayoutID := ReportLayoutSelection."6";
+    
+      IF (FORMAT(CustomLayoutID) <> EmptyLayout) AND CustomReportLayout.GET(CustomLayoutID) THEN BEGIN
+        CustomReportLayout.TESTFIELD(Type,CustomReportLayout.Type::RDLC);
+        CustomReportLayout.CALCFIELDS(Layout);
+        CustomReportLayout.Layout.CREATEINSTREAM(InStream,TEXTENCODING::UTF8);
+        ReportForNav.IsCustomLayout := TRUE;
+      END ELSE
+        REPORT.RDLCLAYOUT(ReportForNav.ReportID,InStream);
+    
+      ReportForNav.LoadRdlc(InStream);
+      IF ReportForNav.IsWindowsClient THEN BEGIN
+        ReportForNav.CheckClientAddIn();
+        ReportForNavClient := ReportForNavClient.Report(ReportForNav.Definition);
+        ReportForNavAllowDesign := ReportForNavClient.HasDesigner AND NOT ReportForNav.ParameterMode;
+      END;
+    END;
+
+    EVENT ReportForNav@5000::OnSave@5010(Base64Layout@1000 : Text);
+    VAR
+      CustomReportLayout@1002 : Record 9650;
+      ReportLayoutSelection@1003 : Record 9651;
+      LayoutId@1004 : Variant;
+      TempBlob@1007 : Record 99008535;
+      OutStream@1006 : OutStream;
+      Bstr@1005 : BigText;
+      EmptyLayout@1001 : Text;
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      EmptyLayout := FORMAT(ReportLayoutSelection."6");
+      LayoutId := ReportLayoutSelection."6";
+      IF ReportLayoutSelection.HasCustomLayout(ReportForNav.ReportID) = 1 THEN BEGIN
+        IF FORMAT(ReportLayoutSelection.GetTempLayoutSelected) <> EmptyLayout THEN BEGIN
+          LayoutId := ReportLayoutSelection.GetTempLayoutSelected;
+        END ELSE BEGIN
+          IF ReportLayoutSelection.GET(ReportForNav.ReportID, COMPANYNAME) THEN BEGIN
+          LayoutId := ReportLayoutSelection."6";
+          END;
+        END;
+      END ELSE BEGIN
+        IF CONFIRM('Default custom layout not found. Create one?') THEN;
+      END;
+      IF FORMAT(LayoutId) <> EmptyLayout THEN BEGIN
+        TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+        Bstr.ADDTEXT(Base64Layout);
+        Bstr.WRITE(OutStream);
+        CustomReportLayout.GET(LayoutId);
+        CustomReportLayout.ImportLayoutBlob(TempBlob, 'RDL');
+      END;
+    END;
+    
+
+    EVENT ReportForNav@5000::OnParameters@5008(Parameters@1000 : Text);
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      ReportForNav.Parameters := REPORT.RUNREQUESTPAGE(ReportForNav.ReportID, Parameters);
+    END;
+    
+
+    EVENT ReportForNav@5000::OnPreview@5009(Parameters@1000 : Text;FileName@1005 : Text);
+    VAR
+      PdfFile@1002 : File;
+      InStream@1003 : InStream;
+      OutStream@1004 : OutStream;
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      COMMIT;
+      PdfFile.CREATETEMPFILE;
+      PdfFile.CREATEOUTSTREAM(OutStream);
+      REPORT.SAVEAS(ReportForNav.ReportID, Parameters, REPORTFORMAT::Pdf, OutStream);
+      PdfFile.CREATEINSTREAM(InStream);
+      ReportForNavClient.ShowDesigner;
+      IF ReportForNav.IsValidPdf(PdfFile.NAME) THEN DOWNLOADFROMSTREAM(InStream, '', '', '', FileName);
+      PdfFile.CLOSE;
+    END;
+    
+
+    EVENT ReportForNav@5000::OnPreSection@5012(DataItemId : Text;SectionId : Text); 
+    BEGIN
+      
+    END;
+    
+    EVENT ReportForNav@5000::OnPostSection@5013(DataItemId : Text;SectionId : Text); 
+    BEGIN
+      
+    END;
+    
+
+    EVENT ReportForNav@5000::OnClientOperation@5014(Args@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array");
+    VAR
+      op@1001 : Text;
+      FileMgmt@1002 : Codeunit 419;
+      Process@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Process" RUNONCLIENT;
+      PathObj@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Path" RUNONCLIENT;
+      FileVersionInfo@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.FileVersionInfo" RUNONCLIENT;
+      DirectoryHelper@1004 : DotNet "'mscorlib'.System.IO.Directory" RUNONCLIENT;
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      op := Args.GetValue(0);
+      CASE op OF
+        'TempPath': ReportForNav.Result := PathObj.GetTempPath();
+        'FileExists': ReportForNav.Result := FileMgmt.ClientFileExists(Args.GetValue(1));
+        'DirectoryExists': ReportForNav.Result := FileMgmt.ClientDirectoryExists(Args.GetValue(1));
+        'ProcessLocation': ReportForNav.Result := Process.GetCurrentProcess().MainModule.FileName;
+        'FileVersion': ReportForNav.Result := FileVersionInfo.GetVersionInfo(Args.GetValue(1)).FileVersion;
+        'DeleteFile': FileMgmt.DeleteClientFile(Args.GetValue(1));
+        'DeleteDirectory': IF STRLEN(Args.GetValue(1)) > 20 THEN
+          IF FileMgmt.ClientDirectoryExists(Args.GetValue(1)) THEN
+            DirectoryHelper.Delete(FORMAT(Args.GetValue(1)), TRUE);
+      END;
+    END;
+    
+    EVENT ReportForNav@5000::OnCheckForNavClientVersion@5015();
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      ReportForNavClient := ReportForNavClient.Report(); 
+      IF ReportForNav.MyFileVersion <> ReportForNavClient.MyFileVersion THEN 
+        ERROR('You have version %1 of the Reports ForNAV assembly here:\\%2\\Please close your NAV client and update it to version %3.',
+              ReportForNavClient.MyFileVersion, ReportForNavClient.MyFileName, ReportForNav.MyFileVersion);
+    END;
+    
+    EVENT ReportForNav@5000::OnSelectPrinter@5006();
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      ReportForNav.PrinterSettings.PageSettings := ReportForNavClient.SelectPrinter(ReportForNav.PrinterSettings.PrinterName,ReportForNav.PrinterSettings.ShowPrinterDialog,ReportForNav.PrinterSettings.PageSettings);
+    END;
+    
+    EVENT ReportForNav@5000::OnPrint@5005(InStream : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream");
+    VAR
+      ClientFileName : Text[255];
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      DOWNLOADFROMSTREAM(InStream, '', '<TEMP>', '', ClientFileName);
+      ReportForNavClient.Print(ClientFileName); 
+    END;
+    
+    EVENT ReportForNav@5000::OnDesign@5007(Data@1001 : Text);
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      ReportForNavClient.Data := Data;
+      WHILE ReportForNavClient.DesignReport DO BEGIN
+        ReportForNav.HandleRequest(ReportForNavClient.GetRequest());
+        SLEEP(100);
+      END;
+    END;
+    
+
+    EVENT ReportForNav@5000::OnView@5003(ClientFileName : Text; Parameters : Text; ServerFileName : Text);
+    VAR
+      ServerFile : File;
+      ServerInStream : InStream;
+      Filter : Text;
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      ServerFile.OPEN(ServerFileName);
+      ServerFile.CREATEINSTREAM(ServerInStream);
+      IF STRLEN(ClientFileName) >= 4 THEN IF LOWERCASE(COPYSTR(ClientFileName, STRLEN(ClientFileName)-3, 4)) = '.pdf' THEN Filter := 'PDF (*.pdf)|*.pdf';
+      IF STRLEN(ClientFileName) >= 4 THEN IF LOWERCASE(COPYSTR(ClientFileName, STRLEN(ClientFileName)-3, 4)) = '.doc' THEN Filter := 'Microsoft Word (*.doc)|*.doc';
+      IF STRLEN(ClientFileName) >= 5 THEN IF LOWERCASE(COPYSTR(ClientFileName, STRLEN(ClientFileName)-4, 5)) = '.xlsx' THEN Filter := 'Microsoft Excel (*.xlsx)|*.xlsx';
+      DOWNLOADFROMSTREAM(ServerInStream,'Export','',Filter,ClientFileName);
+    END;
+    
+    EVENT ReportForNav@5000::OnMessage@5016(Operation : Text;Parameter : Text;ParameterNo : Integer);
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      CASE Operation OF
+        'Open'    : ReportForNavDialog.OPEN(Parameter);
+        'Update'  : ReportForNavDialog.UPDATE(ParameterNo,Parameter);
+        'Close'   : ReportForNavDialog.CLOSE();
+        'Message' : MESSAGE(Parameter);
+        'Error'   : ERROR(Parameter);
+      END;
+    END;
+
+    EVENT ReportForNav@5000::OnPrintPreview@5011(InStream : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream"; Preview : Boolean);
+    VAR
+      ClientFileName : Text[255];
+    BEGIN
+      // This code is created automatically every time Reports ForNAV saves the report.
+      // Do not modify this code.
+      CurrReport.LANGUAGE := SYSTEM.GLOBALLANGUAGE;
+      DOWNLOADFROMSTREAM(InStream, '', '<TEMP>', '', ClientFileName);
+      WHILE ReportForNavClient.PrintPreviewDialog(ClientFileName,ReportForNav.PrinterSettings.PrinterName,Preview) DO BEGIN
+        ReportForNav.HandlePrintPreviewRequest(ReportForNavClient.GetPrintPreviewRequest());
+        SLEEP(100);
+      END;
+    END;
+
+    PROCEDURE InitLogInteraction@1();
+    BEGIN
+      LogInteraction := SegManagement.FindInteractTmplCode(5) <> '';
+    END;
+    PROCEDURE InitializeRequest@5(NewNoOfCopies@1000 : Integer;NewShowInternalInfo@1001 : Boolean;NewLogInteraction@1002 : Boolean;NewShowCorrectionLines@1003 : Boolean;NewShowLotSN@1004 : Boolean;DisplayAsmInfo@1005 : Boolean);
+    BEGIN
+      NoOfCopies := NewNoOfCopies;
+      ShowInternalInfo := NewShowInternalInfo;
+      LogInteraction := NewLogInteraction;
+      ShowCorrectionLines := NewShowCorrectionLines;
+      ShowLotSN := NewShowLotSN;
+      DisplayAssemblyInformation := DisplayAsmInfo;
+    END;
+    LOCAL PROCEDURE FormatAddressFields@3(SalesShipmentHeader@1000 : Record 110);
+    BEGIN
+      FormatAddr.GetCompanyAddr(SalesShipmentHeader."Responsibility Center",RespCenter,CompanyInfo,CompanyAddr);
+      FormatAddr.SalesShptShipTo(ShipToAddr,SalesShipmentHeader);
+      ShowCustAddr := FormatAddr.SalesShptBillTo(CustAddr,ShipToAddr,SalesShipmentHeader);
+    END;
+    LOCAL PROCEDURE FormatDocumentFields@7(SalesShipmentHeader@1000 : Record 110);
+    BEGIN
+      WITH SalesShipmentHeader DO BEGIN
+        FormatDocument.SetSalesPerson(SalesPurchPerson,"Salesperson Code",SalesPersonText);
+        ReferenceText := FormatDocument.SetText("Your Reference" <> '',FIELDCAPTION("Your Reference"));
+      END;
+    END;
+    LOCAL PROCEDURE GetUnitOfMeasureDescr@2(UOMCode@1000 : Code[10]) : Text[10];
+    VAR
+      UnitOfMeasure@1001 : Record 204;
+    BEGIN
+      IF NOT UnitOfMeasure.GET(UOMCode) THEN
+        EXIT(UOMCode);
+      EXIT(UnitOfMeasure.Description);
+    END;
+    PROCEDURE BlanksForIndent@4() : Text[10];
+    BEGIN
+      EXIT(PADSTR('',2,' '));
+    END;
+    BEGIN
+    END.
+  }
+  RDLDATA
+  {
+    <?xml version="1.0" encoding="utf-8"?>
+<Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
+  <Description>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</Description>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>2in</Height>
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+      </Page>
+    </ReportSection>
+  </ReportSections>
+</Report>
+    END_OF_RDLDATA
+  }
+}
+
+
+

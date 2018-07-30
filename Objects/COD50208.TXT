@@ -1,0 +1,47 @@
+OBJECT Codeunit 50208 GetBoxNoFromExtension
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30-07-18;
+    Time=20:35:31;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=110;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetBoxNoWithEvent@1000000000(SalesShipmentHeader@1000000001 : Record 110);
+    VAR
+      BoxNo@1000000000 : Code[20];
+    BEGIN
+      GetBoxNoEvent(SalesShipmentHeader,BoxNo);
+      MESSAGE(BoxNo);
+    END;
+
+    [Integration]
+    LOCAL PROCEDURE GetBoxNoEvent@1000000001(SalesShipmentHeader@1000000001 : Record 110;VAR BoxNo@1000000000 : Code[20]);
+    BEGIN
+    END;
+
+    PROCEDURE GetBoxNoWithRecRef@1000000002(SalesShipmentHeader@1000000002 : Record 110);
+    VAR
+      RecRef@1000000000 : RecordRef;
+      FldRef@1000000001 : FieldRef;
+    BEGIN
+      RecRef.GETTABLE(SalesShipmentHeader);
+      FldRef := RecRef.FIELD(60000);
+      MESSAGE(FORMAT(FldRef.VALUE));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

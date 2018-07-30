@@ -1,0 +1,404 @@
+OBJECT Page 142 Posted Sales Shipments
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30-07-18;
+    Time=20:38:14;
+    Modified=Yes;
+    Version List=NAVW111.00.00.19846;
+  }
+  PROPERTIES
+  {
+    Editable=No;
+    CaptionML=[ENU=Posted Sales Shipments;
+               NLD=Geboekte verkoopverzending];
+    SourceTable=Table110;
+    SourceTableView=SORTING(Posting Date)
+                    ORDER(Descending);
+    PageType=List;
+    CardPageID=Posted Sales Shipment;
+    OnOpenPage=VAR
+                 OfficeMgt@1000 : Codeunit 1630;
+                 HasFilters@1001 : Boolean;
+               BEGIN
+                 HasFilters := GETFILTERS <> '';
+                 SetSecurityFilterOnRespCenter;
+                 IF HasFilters THEN
+                   IF FINDFIRST THEN;
+                 IsOfficeAddin := OfficeMgt.IsAvailable;
+               END;
+
+    ActionList=ACTIONS
+    {
+      { 1900000003;0 ;ActionContainer;
+                      ActionContainerType=RelatedInformation }
+      { 15      ;1   ;ActionGroup;
+                      CaptionML=[ENU=&Shipment;
+                                 NLD=&Verzending];
+                      Image=Shipment }
+      { 28      ;2   ;Action    ;
+                      ShortCutKey=F7;
+                      CaptionML=[ENU=Statistics;
+                                 NLD=Statistiek];
+                      ToolTipML=[ENU=View statistical information, such as the value of posted entries, for the record.;
+                                 NLD=Statistische informatie, zoals de waarde van geboekte posten, voor de record weergeven.];
+                      ApplicationArea=#Advanced;
+                      RunObject=Page 396;
+                      RunPageLink=No.=FIELD(No.);
+                      Promoted=Yes;
+                      Image=Statistics;
+                      PromotedCategory=Process }
+      { 33      ;2   ;Action    ;
+                      CaptionML=[ENU=Co&mments;
+                                 NLD=Op&merkingen];
+                      ToolTipML=[ENU=View or add comments for the record.;
+                                 NLD=Opmerkingen weergeven of toevoegen voor de record.];
+                      ApplicationArea=#Advanced;
+                      RunObject=Page 67;
+                      RunPageLink=Document Type=CONST(Shipment),
+                                  No.=FIELD(No.);
+                      Image=ViewComments }
+      { 1102601000;2 ;Action    ;
+                      AccessByPermission=TableData 348=R;
+                      ShortCutKey=Shift+Ctrl+D;
+                      CaptionML=[ENU=Dimensions;
+                                 NLD=Dimensies];
+                      ToolTipML=[ENU=View or edit dimensions, such as area, project, or department, that you can assign to sales and purchase documents to distribute costs and analyze transaction history.;
+                                 NLD=Dimensies, zoals gebied, project of afdeling, weergeven of bewerken die u kunt toewijzen aan verkoop- en inkoopdocumenten om de kosten te verdelen en de transactiegeschiedenis te analyseren.];
+                      ApplicationArea=#Suite;
+                      Image=Dimensions;
+                      OnAction=BEGIN
+                                 ShowDimensions;
+                               END;
+                                }
+      { 3       ;2   ;Action    ;
+                      Name=CertificateOfSupplyDetails;
+                      CaptionML=[ENU=Certificate of Supply Details;
+                                 NLD=Details certificaat van levering];
+                      ToolTipML=[ENU=View the certificate of supply that you must send to your customer for signature as confirmation of receipt. You must print a certificate of supply if the shipment uses a combination of VAT business posting group and VAT product posting group that have been marked to require a certificate of supply in the VAT Posting Setup window.;
+                                 NLD=Het certificaat van levering weergeven dat u naar uw klant moet verzenden voor een handtekening als bevestiging van ontvangst. U moet een certificaat van levering afdrukken als bij de verzending een combinatie van btw-bedrijfsboekingsgroep en btw-productboekingsgroep wordt gebruikt waarvoor in het venster Btw-boekingsinstellingen is aangegeven dat een certificaat van levering is vereist.];
+                      ApplicationArea=#Advanced;
+                      RunObject=Page 780;
+                      RunPageLink=Document Type=FILTER(Sales Shipment),
+                                  Document No.=FIELD(No.);
+                      Image=Certificate }
+      { 7       ;2   ;Action    ;
+                      Name=PrintCertificateofSupply;
+                      CaptionML=[ENU=Print Certificate of Supply;
+                                 NLD=Certificaat van levering afdrukken];
+                      ToolTipML=[ENU=Print the certificate of supply that you must send to your customer for signature as confirmation of receipt.;
+                                 NLD=Het certificaat van levering afdrukken dat u naar uw klant moet verzenden voor een handtekening als bevestiging van ontvangst.];
+                      ApplicationArea=#Advanced;
+                      Promoted=No;
+                      Image=PrintReport;
+                      OnAction=VAR
+                                 CertificateOfSupply@1000 : Record 780;
+                               BEGIN
+                                 CertificateOfSupply.SETRANGE("Document Type",CertificateOfSupply."Document Type"::"Sales Shipment");
+                                 CertificateOfSupply.SETRANGE("Document No.","No.");
+                                 CertificateOfSupply.Print;
+                               END;
+                                }
+      { 1900000004;0 ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1102601001;1 ;ActionGroup;
+                      CaptionML=[ENU=F&unctions;
+                                 NLD=F&uncties];
+                      Image=Action }
+      { 1102601002;2 ;Action    ;
+                      CaptionML=[ENU=&Track Package;
+                                 NLD=&Zending traceren];
+                      ToolTipML=[ENU="Open the shipping agent's tracking page to track the package. ";
+                                 NLD="De traceringspagina van de expediteur openen om het pakket te traceren. "];
+                      ApplicationArea=#Advanced;
+                      Image=ItemTracking;
+                      OnAction=BEGIN
+                                 StartTrackingSite;
+                               END;
+                                }
+      { 21      ;1   ;Action    ;
+                      Ellipsis=Yes;
+                      CaptionML=[ENU=&Print;
+                                 NLD=&Afdrukken];
+                      ToolTipML=[ENU=Prepare to print the document. A report request window for the document opens where you can specify what to include on the print-out.;
+                                 NLD=Het afdrukken van het document voorbereiden. Er wordt een rapportaanvraagvenster voor het document geopend waarin u kunt opgeven wat er in de afdruk moet worden opgenomen.];
+                      ApplicationArea=#Basic,#Suite;
+                      Promoted=Yes;
+                      Visible=NOT IsOfficeAddin;
+                      Image=Print;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 SalesShptHeader@1102 : Record 110;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER(SalesShptHeader);
+                                 SalesShptHeader.PrintRecords(TRUE);
+                               END;
+                                }
+      { 22      ;1   ;Action    ;
+                      CaptionML=[ENU=&Navigate;
+                                 NLD=&Navigeren];
+                      ToolTipML=[ENU=Find all entries and documents that exist for the document number and posting date on the selected entry or document.;
+                                 NLD=Alle posten en documenten zoeken die voor het documentnummer en de boekingsdatum bestaan in de geselecteerde post of het geselecteerde document.];
+                      ApplicationArea=#Advanced;
+                      Promoted=Yes;
+                      Visible=NOT IsOfficeAddin;
+                      Image=Navigate;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 Navigate;
+                               END;
+                                }
+      { 1000000000;1 ;Action    ;
+                      Name=GetBoxNo;
+                      OnAction=VAR
+                                 GetBoxNoFromExtension@1000000000 : Codeunit 50208;
+                               BEGIN
+                                 GetBoxNoFromExtension.GetBoxNoWithEvent(Rec);
+                               END;
+                                }
+      { 1000000001;1 ;Action    ;
+                      Name=GetBoxNoFromFieldRef;
+                      OnAction=VAR
+                                 GetBoxNoFromExtension@1000000000 : Codeunit 50208;
+                               BEGIN
+                                 GetBoxNoFromExtension.GetBoxNoWithRecRef(Rec);
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1900000001;0;Container;
+                ContainerType=ContentArea }
+
+    { 1   ;1   ;Group     ;
+                GroupType=Repeater }
+
+    { 2   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the number of the involved entry or record, according to the specified number series.;
+                           NLD=Hiermee wordt het nummer opgegeven van de betrokken post of record, volgens de opgegeven nummerreeks.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="No." }
+
+    { 4   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the number of the customer.;
+                           NLD=Hiermee wordt het nummer van de klant opgegeven.];
+                ApplicationArea=#Advanced;
+                SourceExpr="Sell-to Customer No." }
+
+    { 6   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the customer.;
+                           NLD=Hiermee wordt de naam van de klant opgegeven.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Sell-to Customer Name" }
+
+    { 23  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the postal code of the customer's main address.;
+                           NLD=Hiermee wordt de postcode van het hoofdadres van de klant opgegeven.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Sell-to Post Code";
+                Visible=FALSE }
+
+    { 19  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the country/region code of the customer's main address.;
+                           NLD=Hiermee wordt de land-/regiocode van het hoofdadres van de klant opgegeven.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Sell-to Country/Region Code";
+                Visible=FALSE }
+
+    { 31  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the contact person at the customer's main address.;
+                           NLD=Hiermee wordt de naam opgegeven van de contactpersoon op het hoofdadres van de klant.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Sell-to Contact";
+                Visible=FALSE }
+
+    { 99  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the number of the customer that you send or sent the invoice or credit memo to.;
+                           NLD=Hiermee wordt het nummer opgegeven van de klant naar wie u de factuur of creditnota verzendt of hebt verzonden.];
+                ApplicationArea=#Advanced;
+                SourceExpr="Bill-to Customer No.";
+                Visible=FALSE }
+
+    { 97  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the customer that you send or sent the invoice or credit memo to.;
+                           NLD=Hiermee wordt de naam opgegeven van de klant naar wie u de factuur of creditnota verzendt of hebt verzonden.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Bill-to Name";
+                Visible=FALSE }
+
+    { 29  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the postal code of the customer's billing address.;
+                           NLD=Hiermee wordt de postcode opgegeven van het factuuradres van de klant.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Bill-to Post Code";
+                Visible=FALSE }
+
+    { 25  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the country/region code of the customer's billing address.;
+                           NLD=Hiermee wordt de land-/regiocode van het factuuradres van de klant opgegeven.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Bill-to Country/Region Code";
+                Visible=FALSE }
+
+    { 87  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the contact person at the customer's billing address.;
+                           NLD=Hiermee wordt de naam opgegeven van de contactpersoon op het factuuradres van de klant.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Bill-to Contact";
+                Visible=FALSE }
+
+    { 83  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies a code for an alternate shipment address if you want to ship to another address than the one that has been entered automatically. This field is also used in case of drop shipment.;
+                           NLD=Hiermee wordt een code opgegeven voor een alternatief verzendadres als u wilt verzenden naar een ander adres dan het adres dat automatisch is ingevoerd. Dit veld wordt ook gebruikt voor doorverzending.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Ship-to Code";
+                Visible=FALSE }
+
+    { 81  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the customer at the address that the items are shipped to.;
+                           NLD=Hiermee wordt de naam van de klant opgegeven op het adres waar de artikelen naartoe worden verzonden.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Ship-to Name";
+                Visible=FALSE }
+
+    { 17  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the postal code of the address that the items are shipped to.;
+                           NLD=Hiermee wordt de postcode opgegeven van het adres waar de artikelen naartoe worden verzonden.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Ship-to Post Code";
+                Visible=FALSE }
+
+    { 13  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the country/region code of the address that the items are shipped to.;
+                           NLD=Hiermee wordt de land-/regiocode opgegeven van het adres waar de artikelen naartoe worden verzonden.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Ship-to Country/Region Code";
+                Visible=FALSE }
+
+    { 71  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the name of the contact person at the address that the items are shipped to.;
+                           NLD=Hiermee wordt de naam opgegeven van de contactpersoon op het adres waar de artikelen naartoe worden verzonden.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Ship-to Contact";
+                Visible=FALSE }
+
+    { 67  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the date on which the shipment was posted.;
+                           NLD=Hiermee wordt de datum opgegeven waarop de verzending is geboekt.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Posting Date";
+                Visible=FALSE }
+
+    { 53  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies which salesperson is associated with the shipment.;
+                           NLD=Hiermee wordt de verkoper opgegeven die aan de verzending is gekoppeld.];
+                ApplicationArea=#Suite;
+                SourceExpr="Salesperson Code";
+                Visible=FALSE }
+
+    { 59  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the code for Shortcut Dimension 1, which is one of two global dimension codes that you set up in the General Ledger Setup window.;
+                           NLD=Hiermee wordt de code opgegeven van Shortcutdimensie 1. Dat is een van de twee globale dimensiecodes die u instelt in het venster Boekhoudinstellingen.];
+                ApplicationArea=#Suite;
+                SourceExpr="Shortcut Dimension 1 Code";
+                Visible=FALSE }
+
+    { 57  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the code for Shortcut Dimension 2, which is one of two global dimension codes that you set up in the General Ledger Setup window.;
+                           NLD=Hiermee wordt de code opgegeven van Shortcutdimensie 2. Dat is een van de twee globale dimensiecodes die u instelt in het venster Boekhoudinstellingen.];
+                ApplicationArea=#Suite;
+                SourceExpr="Shortcut Dimension 2 Code";
+                Visible=FALSE }
+
+    { 16  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the currency code of the shipment.;
+                           NLD=Hiermee wordt de valutacode van de verzending opgegeven.];
+                ApplicationArea=#Advanced;
+                SourceExpr="Currency Code" }
+
+    { 61  ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the location from which the items were shipped.;
+                           NLD=Hiermee wordt de vestiging opgegeven van waaruit de artikelen zijn verzonden.];
+                ApplicationArea=#Location;
+                SourceExpr="Location Code";
+                Visible=TRUE }
+
+    { 8   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies how many times the document has been printed.;
+                           NLD=Hiermee wordt opgegeven hoe vaak het document is afgedrukt.];
+                ApplicationArea=#Advanced;
+                SourceExpr="No. Printed" }
+
+    { 1102601003;2;Field  ;
+                ToolTipML=[ENU=Specifies the date when the related document was created.;
+                           NLD=Hiermee wordt de datum opgegeven waarop het gerelateerde document is gemaakt.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Document Date";
+                Visible=FALSE }
+
+    { 1102601006;2;Field  ;
+                ToolTipML=[ENU=Specifies the date that the customer has asked for the order to be delivered.;
+                           NLD=Hiermee wordt de datum opgegeven waarop de klant de order wil laten leveren.];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Requested Delivery Date";
+                Visible=FALSE }
+
+    { 1102601008;2;Field  ;
+                ToolTipML=[ENU=Specifies the delivery conditions of the related shipment, such as free on board (FOB).;
+                           NLD=Hiermee worden de leveringsvoorwaarden van de gerelateerde verzending opgegeven, zoals Franco aan boord (FOB).];
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Shipment Method Code";
+                Visible=FALSE }
+
+    { 1102601010;2;Field  ;
+                ToolTipML=[ENU=Specifies the code for the shipping agent who is transporting the items.;
+                           NLD=Hiermee wordt de code opgegeven van de expediteur die de artikelen transporteert.];
+                ApplicationArea=#Suite;
+                SourceExpr="Shipping Agent Code";
+                Visible=FALSE }
+
+    { 5   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the code for the service, such as a one-day delivery, that is offered by the shipping agent.;
+                           NLD=Hiermee wordt de code opgegeven van de service, zoals 24-uurslevering, die de expediteur biedt.];
+                ApplicationArea=#Suite;
+                SourceExpr="Shipping Agent Service Code";
+                Visible=FALSE }
+
+    { 9   ;2   ;Field     ;
+                ToolTipML=[ENU=Specifies the shipping agent's package number.;
+                           NLD=Hiermee wordt het pakketnummer van de expediteur opgegeven.];
+                ApplicationArea=#Suite;
+                SourceExpr="Package Tracking No.";
+                Visible=FALSE }
+
+    { 1102601012;2;Field  ;
+                ToolTipML=[ENU=Specifies when items on the document are shipped or were shipped. A shipment date is usually calculated from a requested delivery date plus lead time.;
+                           NLD=Hiermee wordt opgegeven wanneer artikelen in het document worden of zijn verzonden. Een verzenddatum wordt gewoonlijk berekend op basis van een aangevraagde leverdatum plus doorlooptijd.];
+                ApplicationArea=#Advanced;
+                SourceExpr="Shipment Date";
+                Visible=FALSE }
+
+    { 1900000007;0;Container;
+                ContainerType=FactBoxArea }
+
+    { 1900383207;1;Part   ;
+                Visible=FALSE;
+                PartType=System;
+                SystemPartID=RecordLinks }
+
+    { 1905767507;1;Part   ;
+                PartType=System;
+                SystemPartID=Notes }
+
+  }
+  CODE
+  {
+    VAR
+      IsOfficeAddin@1000 : Boolean;
+
+    BEGIN
+    END.
+  }
+}
+
